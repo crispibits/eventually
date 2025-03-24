@@ -43,28 +43,14 @@ type Location struct {
 	URL         string `json:"url"`
 }
 
-func LoadEvents(file string) ([]Event, error) {
-	var events []Event
+func LoadJson(file string, dest any) error {
 	eventJson, err := os.ReadFile(file)
 	if err != nil {
-		return events, err
+		return err
 	}
-	err = json.Unmarshal(eventJson, &events)
+	err = json.Unmarshal(eventJson, &dest)
 	if err != nil {
-		return events, err
+		return err
 	}
-	return events, nil
-}
-
-func LoadLocations(file string) ([]Location, error) {
-	var locations []Location
-	locationJson, err := os.ReadFile(file)
-	if err != nil {
-		return locations, err
-	}
-	err = json.Unmarshal(locationJson, &locations)
-	if err != nil {
-		return locations, err
-	}
-	return locations, nil
+	return nil
 }

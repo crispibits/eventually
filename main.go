@@ -34,6 +34,7 @@ func main() {
 	fmt.Println(cost)
 	createEvents()
 	createLocations()
+	getEvents()
 }
 
 func createDB() {
@@ -50,7 +51,8 @@ func createDB() {
 }
 
 func createEvents() {
-	events, err := model.LoadEvents("objects/events.json")
+	var events []model.Event
+	err := model.LoadJson("objects/events.json", &events)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -78,41 +80,36 @@ func createEvents() {
 	}
 }
 
+func CheckErr(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 func createLocations() {
-	locations, err := model.LoadLocations("objects/locations.json")
-	if err != nil {
-		log.Fatal(err)
-	}
+	var locations []model.Location
+	err := model.LoadJson("objects/locations.json", &locations)
+	CheckErr(err)
 	eventStmt, err := db.Prepare("INSERT INTO location(name,display_name,address,longitude,latitude,url) values(?,?,?,?,?,?)")
-	if err != nil {
-		log.Fatal(err)
-	}
+	CheckErr(err)
 	var result sql.Result
 	for _, location := range locations {
 		fmt.Println(location.Name)
 		result, err = eventStmt.Exec(location.Name, location.DisplayName, location.Address, location.Longitude, location.Latitude, location.URL)
-		if err != nil {
-			log.Fatal(err)
-		}
+		CheckErr(err)
 		id, err := result.LastInsertId()
-		if err != nil {
-			log.Fatal(err)
-		}
+		CheckErr(err)
 		fmt.Println(id)
 	}
 }
 
 func getEvents() {
 	rows, err := db.Query("select costs from event")
-	if err != nil {
-		log.Fatal(err)
-	}
+	CheckErr(err)
 	for rows.Next() {
 		var name string
 		err = rows.Scan(&name)
-		if err != nil {
-			log.Fatal(err)
-		}
+		CheckErr(err)
 		fmt.Println(name)
 		var costs []model.Cost
 		json.Unmarshal([]byte(name), &costs)
